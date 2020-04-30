@@ -1,0 +1,124 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>DOM</title>
+<style>
+#thead1.td { width : 100px; }
+</style>
+<script>
+window.onload=function()
+{
+
+	var oTab=document.getElementById('tbl1');
+	var oName=document.getElementById('name1');
+	var oAge=document.getElementById('age');
+	var oBtn5=document.getElementById('btn5');
+	var oBtn6=document.getElementById('btn6');
+	oBtn5.onclick=function()
+	{
+		for (i = 0; i < oTab.tBodies[0].rows.length; i++) 
+		{
+			var xtab=oTab.tBodies[0].rows[i].cells[1].innerHTML.toLowerCase();
+			var xtxt=oName.value.toLowerCase();
+			var arr =xtxt.split(' ');
+			for (j = 0; j < arr.length; j++) 
+			{
+				if(xtab.search(arr[j])!=-1){
+				
+//					oTab.tBodies[0].rows[i].style.background='red';
+//					oTab.tBodies[0].rows[i].style.width='50px';
+					oTab.tBodies[0].rows[i].cells[0].style.width='100px';
+					oTab.tBodies[0].rows[i].cells[1].style.width='100px';
+					oTab.tBodies[0].rows[i].cells[2].style.width='100px';
+//					oTab.tBodies[0].rows[i].cells[3].style.width='100px';
+					oTab.tBodies[0].rows[i].style.display='block';
+				
+				}
+				else
+				{
+					oTab.tBodies[0].rows[i].style.display='none';
+				
+				}
+			}
+		
+		}
+	}
+	
+	oBtn6.onclick=function()
+	{
+		var arr =[];
+		for (i = 0; i < oTab.tBodies[0].rows.length; i++) 
+		{	
+			arr[i]=oTab.tBodies[0].rows[i];
+		}	
+		arr.sort(function(tr1,tr2)
+			{
+				var n1 = parseInt(tr1.cells[0].innerHTML);
+				var n2 = parseInt(tr2.cells[0].innerHTML);
+				
+				return n1-n2;
+			}
+		);
+		for (i = 0; i < arr.length; i++) 
+		{
+			oTab.tBodies[0].appendChild(arr[i]);
+		}
+	}
+};
+</script>
+</head>
+
+<body>
+<table id = "tbl1" border="1" width = "400px">
+NMAE<input id="name1" type = "text"  />
+YEAR<input id="age" type = "text"  />
+<input id="btn5" type = "button" value = "SOUSYO" />
+<input id="btn6" type = "button" value = "PAIXU" />
+	<thead id = "thead1">
+		<td >ID</td>
+		<td >name</td>
+		<td >olds</td>
+		<td >souzuo</td>
+	</thead>
+	<tbody>
+		<tr>
+			<td>1</td>
+			<td>blue</td>
+			<td>27</td>
+		</tr>
+		<tr>
+			<td>2</td>
+			<td>zhangsan</td>
+			<td>23</td>
+		</tr>
+		<tr>
+			<td>4</td>
+			<td>lisi</td>
+			<td>28</td>
+		</tr>
+		<tr>
+			<td>3</td>
+			<td>wangwu</td>
+			<td>25</td>
+		</tr>
+		<tr>
+			<td>7</td>
+			<td>zhangwei</td>
+			<td>24</td>
+		</tr>
+		<tr>
+			<td>6</td>
+			<td>bbb</td>
+			<td>43</td>
+			<td>43</td>
+		</tr>
+		<tr>
+			<td>5</td>
+			<td>ff</td>
+			<td>24</td>
+			<td>43</td>
+		</tr>
+	</tbody>
+</table>
+</body>
+</html>
