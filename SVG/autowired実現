@@ -1,0 +1,60 @@
+
+?是Spring的一个特殊的注入功能
+当注入一个Map的?候 ，value泛型?MaoService，?注入后Spring会将?例化后的bean放入value ，key??注入后bean的名字
+当注入一个List的?候，List的泛型?MaoService，?注入后Spring会将?例化的bean放入List中
+
+
+package com.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+
+@Component
+public class Test {
+
+    @Autowired
+    private Map<String,MaoService> maoServiceMap;
+
+    @Autowired
+    private List<MaoService> maoServiceList;
+
+
+
+    public void  sendMap(){
+        this.maoServiceMap.get("cat").say();
+    }
+
+     public void  sendList(){
+        this.maoServiceList.get(0).say();
+    }
+}
+
+
+package com.service.impl;
+
+import com.service.MaoService;
+import org.springframework.stereotype.Component;
+@Component
+public class Dog implements MaoService {
+    @Override
+    public void say() {
+        System.out.println("AAA");
+    }
+}
+
+
+package com.service.impl;
+
+import com.service.MaoService;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Cat  implements MaoService {
+    @Override
+    public void say() {
+        System.out.println("SSS");
+    }
+}
