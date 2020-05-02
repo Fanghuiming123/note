@@ -1,0 +1,16 @@
+var oBtn =document.getElementById('file11');
+	oBtn.onclick=function(){
+		var fileName1 =document.getElementById('file1').value;
+		var xmlhttp;
+		if (window.XMLHttpRequest)
+		  {// code for IE7+, Firefox, Chrome, Opera, Safari
+		  xmlhttp=new XMLHttpRequest();
+		  }
+		else
+		  {// code for IE6, IE5
+		  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		  }
+		
+		xmlhttp.open("POST",contextRoot + "upload",true);
+		xmlhttp.send("filename = fileName1");
+	}
