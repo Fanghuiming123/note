@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="fragments/loggedlayout">
+<head>
+    <meta charset="UTF-8">
+    <title>社員ホーム</title>
+    <script th:inline="javascript">
+        $(function () {
+
+            var axisX = ['10月','11月','12月','1月','2月','3月',];
+            var axisYWorkhour = [160,175,140,180,158,170,];
+
+            var dataWorkhour = {
+                labels : axisX,
+                series : [ axisYWorkhour ]
+            };
+
+            var options = {
+                lineSmooth : Chartist.Interpolation.none(),
+                seriesBarDistance : 10,
+                axisX : {
+                    showGrid : true
+                },
+                axisY: {
+                    onlyInteger: true
+                },
+                height : "150px"
+            };
+
+            Chartist.Line('#chartWorkHour', dataWorkhour, options);
+
+
+
+        -----追加
+        var $wrap = $(".wrap");
+        var find = function(str){
+            return $wrap.find(str);
+        }
+        var getJname = function(name){
+            return find("input[name='"+name+"']");
+        }
+        getJname("Upload").click(function(){
+              var form = new FormData(document.getElementById("tf"));
+              $.ajax({
+                url:contextRoot + "upload",
+                type:"post",
+                data:form,
+                dataType:"json",
+                processData:false,
+                contentType:false,
+                success:function(data){
+                    //window.clearInterval(timer);                 
+                       if(data.success == "success"){
+                           alert("提交文件成功,已将数据存入数据?");
+                       }
+                },
+                error:function(e){
+                    alert("??！");
+                    //window.clearInterval(timer);
+                }
+            });
+          })
+	-----追加
+        });
+
+        
+    </script>
+</head>
+<body>
+    <div layout:fragment="body" class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="card" onclick="window.location = contextRoot + 'notification/list';">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <div class="icon-big icon-danger text-center">
+                                        <i class="fa fa-bullhorn"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-9">
+                                    <div class="numbers">
+                                        <p>未確認のお知らせ</p>
+                                        <span th:text="${topinfo.getNotification()}" th:class="${topinfo.getNotification() > 0 ? 'active' : ''}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="card" onclick="window.location = contextRoot + 'application/list';">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <div class="icon-big icon-warning text-center">
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-9">
+                                    <div class="numbers">
+                                        <p>処理待ちの申請</p>
+                                        <span th:text="${topinfo.getProcess()}" th:class="${topinfo.getProcess() > 0 ? 'active' : ''}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="card" onclick="window.location = contextRoot + 'questionnaire/list';">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <div class="icon-big icon-success text-center">
+                                        <i class="fa fa-edit"></i>
+                                    </div>
+                                </div>
+                                <div class="col-xs-9">
+                                    <div class="numbers">
+                                        <p>未入力のアンケート</p>
+                                        <span th:text="${topinfo.getSurvey()}" th:class="${topinfo.getSurvey() > 0 ? 'active' : ''}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                    <div class="card ">
+                        <div class="header">
+                            <h4 class="title">
+                                先月の勤務時間(仮データ)
+                            </h4>
+                        </div>
+                        <div class="content">
+                            <div id="chartWorkHour" class="ct-chart-workhour"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            -----追加
+      <div class="wrap">
+          <form id="tf">
+              <p>
+                  <input type="file" name="file" value="文件"/>
+                Excel文件：<input type="button" name="Upload" value="upload"/>
+            </p>            
+          </form>
+      </div>
+      -----追加
+        </div>
+        <!-- End of class="container-fluid" -->
+    </div>
+
+    <!-- End of class="content" -->
+</body>
+</html>
