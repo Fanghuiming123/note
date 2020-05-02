@@ -1,0 +1,87 @@
+package jp.co.wisdom_technology.employee.controller;
+
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import jp.co.wisdom_technology.employee.dao.gen.mapper.ExcelUploadMapper;
+import jp.co.wisdom_technology.employee.model.ExcelUploadModel;
+import jp.co.wisdom_technology.employee.service.ExcelUploadService;
+ 
+@Controller
+//@WebServlet("/upload")
+//@RequestMapping(value = "/upload")
+public class ExcelUploadController {
+
+	
+	
+	
+    @Autowired
+    private ExcelUploadService excelUploadService;
+    
+    private ExcelUploadMapper ExcelUploadMapper;
+
+    
+    
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @ResponseBody
+    public String uploadExcel(HttpServletRequest request) throws Exception {
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+//        String filename = request.getParameter("filename");
+//        File file = new File(filename);
+        Iterator <String> fileNames = multipartRequest.getFileNames();
+        String fileName = "";
+        List<String> fileNameList;
+
+        while(fileNames.hasNext()) {
+        	fileName = fileNames.next();
+        }
+        MultipartFile file = multipartRequest.getFile(fileName);
+        if (file.isEmpty()) {
+            return "文件不能为空";
+        }
+        InputStream inputStream = ((ServletRequest) file).getInputStream();
+        List<ExcelUploadModel> list = excelUploadService.getBankListByExcel(inputStream, file.getOriginalFilename());
+        inputStream.close();
+
+        for (int i = 1; i < list.size(); i++) {
+        	ExcelUploadModel lo = list.get(i);
+//        	lo.getApplicationID();
+//        	lo.getApplicationName();
+//        	lo.getCreatTime();
+//        	lo.getRouteType();
+//        	lo.getApproverIds();
+//        	lo.getApproverNames();
+        	ExcelUploadMapper.insertDataToTable(lo);
+        }
+        return "上传成功";
+    }
+    
+//    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+//    @ResponseBody
+//    protected void doPost(HttpServletRequest request,HttpServletResponse response) throws ServletException {
+//    	
+//    	String filename = request.getParameter("filename");
+//    	if(filename.isEmpty()) {
+//    
+//    	}else {
+//    		File file = new File(filename);
+//    	}
+//    	
+//    	
+//    }
+
+}
