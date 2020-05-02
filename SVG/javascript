@@ -41,11 +41,11 @@
             return find("input[name='"+name+"']");
         }
         getJname("Upload").click(function(){
-              var form = new FormData(document.getElementById("tf"));
+              //var form = new FormData(document.getElementById("tf"));
               $.ajax({
                 url:contextRoot + "upload",
                 type:"post",
-                data:form,
+                data:{file:$("#file").val()},
                 dataType:"json",
                 processData:false,
                 contentType:false,
@@ -147,7 +147,7 @@
       <div class="wrap">
           <form id="tf">
               <p>
-                  <input type="file" name="file" value="文件"/>
+                  <input type="file" id="file" value="文件"/>
                 Excel文件：<input type="button" name="Upload" value="upload"/>
             </p>            
           </form>
