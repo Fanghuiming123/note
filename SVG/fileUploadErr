@@ -1,0 +1,8 @@
+现在的source里面取得的文件路径:
+实际路径：C:\1234.xlsx
+取得路径：C:\fakepath\1234.xlsx
+
+
+下面路径介绍一种不用ajax的方法，
+但是按照里面的介绍source改完以后，前后台连不上
+https://blog.csdn.net/gnail_oug/article/details/80324120
