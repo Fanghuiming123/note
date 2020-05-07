@@ -2,6 +2,8 @@
 
 [参考内容](https://qiita.com/yumetodo/items/00b37234cb86e741f0fb)  
 
+- javascriptに、window.openメソッドの代わりに、ajaxメソッドを使って、子画面が出ないように、親画面の一部分のみ更新できる。  
+*レスポンスはHTMLである場合、parseHTMLによる変更する。*
 
 ```html 
 index.html
