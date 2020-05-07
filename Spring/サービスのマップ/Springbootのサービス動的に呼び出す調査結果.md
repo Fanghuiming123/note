@@ -1,8 +1,11 @@
-# 
-- MapまたListどちらでも使える。Mapのほうが良い、Key(`server名`)があるから、必要なServiceはmap.get(`server名`)で取れる。
+## 実現方法について
+ MapまたListどちらでも使える。Mapのほうが良い、Key(`server名`)があるから、必要なServiceはmap.get(`server名`)で取れる。
 
-- 動的に呼び出すサービスは同じinterfaceをimplementしたほうが良い。  
-  同じinterfaceを利用しないと、`Map<String,Object> map`でもAutowriedできるが、利用はやりづらい。  
+## 考え
+動的に呼び出すサービスは同じinterfaceをimplementしたほうが良い。  
+同じinterfaceを利用しないと、`Map<String,Object> map`でもAutowriedできるが、利用はやりづらい。  
+
+## 製造のイメージ
 
     - サービス1の抜粋  
     >
