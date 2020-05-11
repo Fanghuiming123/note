@@ -1,0 +1,363 @@
+mybatis的常用动态sql标签
+
+一. 定义 sql 语句
+select 标签
+属性介绍:
+
+id :唯一的标识符.
+parameterType:传给此语句的参数的全路径名或别名 例:com.test.poso.User 或 user
+resultType :语句返回值类型或别名。注意，如果是集合，那么这里填写的是集合的泛型，而不是集合本身（resultType 与 resultMap 不能并用）
+<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Object">
+    select * from student where id=#{id}
+</select>
+
+insert 标签
+属性介绍:
+
+id :唯一的标识符
+parameterType:传给此语句的参数的全路径名或别名 例:com.test.poso.User
+<insert id="insert" parameterType="Object">
+    insert into student
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="name != null"> NAME, </if>
+    </trim>
+    <trim prefix="values(" suffix=")" suffixOverrides=",">
+        <if test="name != null"> #{name}, </if>
+     </trim>
+</insert>
+
+delete 标签
+属性同 insert
+
+<delete id="deleteByPrimaryKey" parameterType="Object">
+    delete from student where id=#{id}
+</delete>
+
+update 标签
+属性同 insert
+
+二. 配置 JAVA 对象属性与查询结果集中列名对应关系
+resultMap 标签的使用
+基本作用：
+
+建立 SQL 查询结果字段与实体属性的映射关系信息
+查询的结果集转换为 java 对象，方便进一步操作。
+将结果集中的列与 java 对象中的属性对应起来并将值填充进去
+！注意：与 java 对象对应的列不是数据库中表的列名，而是查询后结果集的列名
+
+<resultMap id="BaseResultMap" type="com.online.charge.platform.student.model.Student">
+    <id property="id" column="id" />
+    <result column="NAME" property="name" />
+    <result column="HOBBY" property="hobby" />
+    <result column="MAJOR" property="major" />
+    <result column="BIRTHDAY" property="birthday" />
+    <result column="AGE" property="age" />
+</resultMap>
+
+<!--查询时resultMap引用该resultMap -->
+<select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="Object">
+    select id,name,hobby,major,birthday,age from student where id=#{id}
+</select>
+
+标签说明：
+
+主标签：
+
+id:该 resultMap 的标志
+type：返回值的类名，此例中返回 Studnet 类
+子标签：
+
+id:用于设置主键字段与领域模型属性的映射关系，此处主键为 ID，对应 id。
+result：用于设置普通字段与领域模型属性的映射关系
+三. 动态 sql 拼接
+if 标签
+if 标签通常用于 WHERE 语句、UPDATE 语句、INSERT 语句中，通过判断参数值来决定是否使用某个查询条件、判断是否更新某一个字段、判断是否插入某个字段的值。
+
+<if test="name != null and name != ''">
+    and NAME = #{name}
+</if>
+
+foreach 标签
+foreach 标签主要用于构建 in 条件，可在 sql 中对集合进行迭代。也常用到批量删除、添加等操作中。
+
+<!-- in查询所有，不分页 -->
+<select id="selectIn" resultMap="BaseResultMap">
+    select name,hobby from student where id in
+    <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</select>
+
+属性介绍：
+
+collection：collection 属性的值有三个分别是 list、array、map 三种，分别对应的参数类型为：List、数组、map 集合。
+item ：表示在迭代过程中每一个元素的别名
+index ：表示在迭代过程中每次迭代到的位置（下标）
+open ：前缀
+close ：后缀
+separator ：分隔符，表示迭代时每个元素之间以什么分隔
+choose 标签
+有时候我们并不想应用所有的条件，而只是想从多个选项中选择一个。MyBatis 提供了 choose 元素，按顺序判断 when 中的条件出否成立，如果有一个成立，则 choose 结束。当 choose 中所有 when
+的条件都不满则时，则执行 otherwise 中的 sql。类似于 Java 的 switch 语句，choose 为 switch，when 为 case，otherwise 则为 default。
+
+if 是与(and)的关系，而 choose 是或（or）的关系。
+
+<select id="getStudentListChoose" parameterType="Student" resultMap="BaseResultMap">
+    SELECT * from STUDENT WHERE 1=1
+    <where>
+        <choose>
+            <when test="Name!=null and student!='' ">
+                AND name LIKE CONCAT(CONCAT('%', #{student}),'%')
+            </when>
+            <when test="hobby!= null and hobby!= '' ">
+                AND hobby = #{hobby}
+            </when>
+            <otherwise>
+                AND AGE = 15
+            </otherwise>
+        </choose>
+    </where>
+</select>
+
+四. 格式化输出
+where 标签
+当 if 标签较多时，这样的组合可能会导致错误。 如下：
+
+<select id="getStudentListWhere" parameterType="Object" resultMap="BaseResultMap">
+    SELECT * from STUDENT WHERE
+    <if test="name!=null and name!='' ">
+        NAME LIKE CONCAT(CONCAT('%', #{name}),'%')
+    </if>
+    <if test="hobby!= null and hobby!= '' ">
+        AND hobby = #{hobby}
+    </if>
+</select>
+
+当 name 值为 null 时，查询语句会出现 “WHERE AND” 的情况，解决该情况除了将"WHERE"改为“WHERE 1=1”之外，还可以利用 where
+标签。这个“where”标签会知道如果它包含的标签中有返回值的话，它就插入一个‘where’。此外，如果标签返回的内容是以 AND 或 OR 开头的，则它会剔除掉。
+
+<select id="getStudentListWhere" parameterType="Object" resultMap="BaseResultMap">
+    SELECT * from STUDENT
+    <where>
+        <if test="name!=null and name!='' ">
+            NAME LIKE CONCAT(CONCAT('%', #{name}),'%')
+        </if>
+        <if test="hobby!= null and hobby!= '' ">
+            AND hobby = #{hobby}
+        </if>
+    </where>
+</select>
+
+set 标签
+没有使用 if 标签时，如果有一个参数为 null，都会导致错误。当在 update 语句中使用 if 标签时，如果最后的 if 没有执行，则或导致逗号多余错误。使用 set 标签可以将动态的配置 set
+关键字，和剔除追加到条件末尾的任何不相关的逗号。
+
+<update id="updateStudent" parameterType="Object">
+    UPDATE STUDENT
+    SET NAME = #{name},
+    MAJOR = #{major},
+    HOBBY = #{hobby}
+    WHERE ID = #{id};
+</update>
+
+<update id="updateStudent" parameterType="Object">
+    UPDATE STUDENT SET
+    <if test="name!=null and name!='' ">
+        NAME = #{name},
+    </if>
+    <if test="hobby!=null and hobby!='' ">
+        MAJOR = #{major},
+    </if>
+    <if test="hobby!=null and hobby!='' ">
+        HOBBY = #{hobby}
+    </if>
+    WHERE ID = #{id};
+</update>
+
+使用 set+if 标签修改后，如果某项为 null 则不进行更新，而是保持数据库原值。
+
+<update id="updateStudent" parameterType="Object">
+    UPDATE STUDENT
+    <set>
+        <if test="name!=null and name!='' ">
+            NAME = #{name},
+        </if>
+        <if test="hobby!=null and hobby!='' ">
+            MAJOR = #{major},
+        </if>
+        <if test="hobby!=null and hobby!='' ">
+            HOBBY = #{hobby}
+        </if>
+    </set>
+    WHERE ID = #{id};
+</update>
+
+mybatis标签之trim标签
+trim标记是一个格式化的标记，主要用于拼接sql的条件语句（前缀或后缀的添加或忽略），可以完成set或者是where标记的功能。
+
+trim属性主要有以下四个
+
+prefix：在trim标签内sql语句加上前缀
+suffix：在trim标签内sql语句加上后缀
+prefixOverrides：指定去除多余的前缀内容，如：prefixOverrides=“AND | OR”，去除trim标签内sql语句多余的前缀"and"或者"or"。
+suffixOverrides：指定去除多余的后缀内容。
+例如在update中
+<update id="updateByPrimaryKey" parameterType="Object">
+	update student set 
+	<trim  suffixOverrides=",">
+		<if test="name != null">
+		    NAME=#{name},
+		</if>
+		<if test="hobby != null">
+		    HOBBY=#{hobby},
+		</if>
+	</trim> 
+	where id=#{id}
+</update>
+
+如果name和hobby的值都不为空的话，会执行如下语句
+
+update student set NAME='XX',HOBBY='XX' /*,*/ where id='XX'
+
+会忽略最后一个“，” ；
+
+在select中
+<select id="selectByNameOrHobby" resultMap="BaseResultMap">
+	select * from student 
+	<trim prefix="WHERE" prefixOverrides="AND | OR">
+		<if test="name != null and name.length()>0"> 
+			AND name=#{name}
+		</if>
+		<if test="hobby != null and hobby.length()>0">
+			AND hobby=#{hobby}
+		</if>
+	</trim>
+</select>
+
+如果name和hobby的值都不为空的话，会执行如下语句
+
+    select*fromuserWHERE /*and*/ name = ‘xx’ and hobby= ‘xx’
+
+会为片段添加 “WHERE” 前缀，并忽略第一个 “and” ；
+
+当然，避免出现“WHERE AND”还有其他方法，如下
+
+<!--将where提取出来，并加上“1=1”的查询条件 -->
+select * from student where 1=1
+	<trim suffixOverrides=",">
+		<if test="name != null and name != ''">
+			and NAME = #{name}
+		</if>
+		<if test="hobby != null and hobby != ''">
+			and HOBBY = #{hobby}
+		</if>
+	</trim>
+
+用在insert中
+<insert id="insert" parameterType="Object">
+    insert into student 
+	<trim prefix="(" suffix=")" suffixOverrides=",">
+		<if test="name != null">
+			NAME,
+		</if>
+		<if test="hobby != null  ">
+			HOBBY,
+		</if>
+	</trim>
+	<trim prefix="values(" suffix=")" suffixOverrides=",">
+		<if test="name != null  ">
+			#{name},
+		</if>
+		<if test="hobby != null  ">
+			#{hobby},
+		</if>
+	</trim>
+</insert>
+
+
+
+五. 配置关联关系 調査課題
+5.1 collection 标签
+
+5.2 association 标签
+
+
+六. 定义常量及引用
+sql 标签
+当多种类型的查询语句的查询字段或者查询条件相同时，可以将其定义为常量，方便调用。为求 <select> 结构清晰也可将 sql 语句分解。
+
+```
+<!-- 查询字段 -->
+<sql id="Base_Column_List">
+    ID,MAJOR,BIRTHDAY,AGE,NAME,HOBBY
+</sql>
+
+<!-- 查询条件 -->
+<sql id="Example_Where_Clause">
+    where 1=1
+    <trim suffixOverrides=",">
+        <if test="id != null and id !=''">
+            and id = #{id}
+        </if>
+        <if test="major != null and major != ''">
+            and MAJOR = #{major}
+        </if>
+        <if test="birthday != null ">
+            and BIRTHDAY = #{birthday}
+        </if>
+        <if test="age != null ">
+            and AGE = #{age}
+        </if>
+        <if test="name != null and name != ''">
+            and NAME = #{name}
+        </if>
+        <if test="hobby != null and hobby != ''">
+            and HOBBY = #{hobby}
+        </if>
+        <if test="sorting != null">
+            order by #{sorting}
+        </if>
+        <if test="sort!= null and sort != ''">
+            order by ${sort} ${order}
+        </if>
+    </trim>
+</sql>
+```
+include 标签
+用于引用定义的常量
+
+<!-- 查询所有，不分页 -->
+<select id="selectAll" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM student
+    <include refid="Example_Where_Clause" />
+</select>
+
+
+<!-- 分页查询 -->
+<select id="select" resultMap="BaseResultMap">
+    select * from (
+        select tt.*,rownum as rowno from
+        (
+            SELECT
+            <include refid="Base_Column_List" />
+            FROM student
+            <include refid="Example_Where_Clause" />
+            ) tt
+            <where>
+                <if test="pageNum != null and rows != null">
+                    and rownum
+                    <![CDATA[<=]]>#{page}*#{rows}
+                </if>
+            </where>
+        ) table_alias
+    where table_alias.rowno>#{pageNum}
+</select>
+
+
+<!-- 根据条件删除 -->
+<delete id="deleteByEntity" parameterType="java.util.Map">
+    DELETE FROM student
+    <include refid="Example_Where_Clause" />
+</delete>
